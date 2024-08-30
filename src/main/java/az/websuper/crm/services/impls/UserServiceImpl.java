@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
         List<Role> roles = new ArrayList<>();
         Role role = roleService.getRoleByName("DRIVER");
         roles.add(role);
+
         List<User> users = userRepository.findAll().stream()
                 .filter(c -> c.getRoles()
                         .contains(role) && c.getCompany().getId()

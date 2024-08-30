@@ -36,6 +36,7 @@ public class User implements UserDetails {
     private boolean emailConfirmed;
     private String confirmationToken;
     private int loginAttempt;
+    private Boolean deleted;
 
     @ManyToOne
     private Company company;

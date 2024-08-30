@@ -6,6 +6,7 @@ import az.websuper.crm.dtos.driver.DriverDto;
 import az.websuper.crm.dtos.driver.DriverUpdateDto;
 import az.websuper.crm.models.Customer;
 import az.websuper.crm.models.Role;
+import az.websuper.crm.models.Transport;
 import az.websuper.crm.models.User;
 import az.websuper.crm.payloads.ApiResponse;
 import az.websuper.crm.payloads.PaginationPayload;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -38,6 +40,7 @@ public class DriverServiceImpl implements DriverService {
     private final PasswordEncoder passwordEncoder;
 
     private final RoleService  roleService;
+
 
     public DriverServiceImpl(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, PasswordEncoder passwordEncoder1, RoleService roleService) {
         this.userRepository = userRepository;
@@ -90,7 +93,21 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public ApiResponse updateDriver(String userEmail, Long id, DriverUpdateDto driverUpdateDto) {
 
-        return null;
+        try {
+            User findDriver = userRepository.findById(id).orElseThrow();
+            User findUserCompany = userRepository.findByEmail(userEmail);
+            if (!findUserCompany.getCompany().getName().equals(findDriver.getCompany().getName())) {
+                return new ApiResponse("Siz bu istifadechini yenileye bilmezsiniz!", false);
+            }
+            findDriver.setEmail(driverUpdateDto.getEmail());
+            findDriver.setFirstName(driverUpdateDto.getFirstName());
+            findDriver.setLastName(driverUpdateDto.getLastName());
+            userRepository.save(findDriver);
+            return new ApiResponse(" Surucu melumatlari yenilendi ", true);
+        } catch (Exception e) {
+
+            return new ApiResponse(e.getMessage(), false);
+        }
     }
 
     @Override
@@ -112,8 +129,20 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public ApiResponse removeDriver(String userEmail, Long id) {
 
-        return null;
+        try {
+            User findDriver = userRepository.findById(id).orElseThrow();
+            User findUserCompany = userRepository.findByEmail(userEmail);
+            if (!findUserCompany.getCompany().getName().equals(findDriver.getCompany().getName())) {
+                return null;
+            }
+            findDriver.setDeleted(true);
+            userRepository.save(findDriver);
+            return new ApiResponse("Surucu silindi ", true);
+        } catch (Exception e) {
+            return new ApiResponse(e.getMessage(), false);
+        }
     }
+
 
     @Override
     public List<DriverDto> getDrivers(String adminEmail) {
